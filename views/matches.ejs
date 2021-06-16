@@ -1,0 +1,53 @@
+<%- include("_header") -%>
+
+<h1>List of matches (<%= model.length %>)</h1>
+
+<div class="table-responsive-sm">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>year</th>
+        <th>league</th>
+        <th>kind</th>
+        <th>date</th>
+        <th>time</th>
+        <th>home</th>
+        <th>homescore</th>
+        <th>awayscore</th>
+        <th>away</th>
+        <th>stadium</th>
+        <th>viewers</th>
+        <th>broadcasts</th>
+        <th class="d-print-none">
+          <a class="btn btn-sm btn-success" href="/matchcreate">Add</a>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const match of model) { %>
+        <tr>
+          <td><%= match.id %></td>
+          <td><%= match.year %></td>
+          <td><%= match.league %></td>
+          <td><%= match.kind %></td>
+          <td><%= match.date %></td>
+          <td><%= match.time %></td>
+          <td><%= match.home %></td>
+          <td><%= match.homescore %></td>
+          <td><%= match.awayscore %></td>
+          <td><%= match.away %></td>
+          <td><%= match.stadium %></td>
+          <td><%= match.viewers %></td>
+          <td><%= match.broadcasts %></td>
+          <td class="d-print-none">
+            <a class="btn btn-sm btn-warning" href="/matchedit/<%= match.id %>">Edit</a>
+            <a class="btn btn-sm btn-danger" href="/matchdelete/<%= match.id %>">Delete</a>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include("_footer") -%>
