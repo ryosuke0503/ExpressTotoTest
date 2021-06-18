@@ -1,6 +1,8 @@
 const express = require("express");
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
+const multer = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 const app = express();
 //const db_name = path.join(__dirname, "data", "apptest.sqlite3");
@@ -122,6 +124,7 @@ app.get("/matchedit/:id", (req, res) => {
   const sql = "SELECT * FROM Matches WHERE id = ?";
   db.get(sql, id, (err, row) => {
     // if (err) ...
+    console.log(row);
     res.render("matchedit", { model: row });
   });
 });
@@ -178,17 +181,22 @@ app.post("/teamdelete/:id", (req, res) => {
 });
 app.get("/matchdelete/:id", (req, res) => {
   const id = req.params.id;
-  const sql = "SELECT * FROM matcehs WHERE id = ?";
+  const sql = "SELECT * FROM Matches WHERE id = ? ";
   db.get(sql, id, (err, row) => {
     // if (err) ...
+    console.log(row);
     res.render("matchdelete", { model: row });
   });
 });
 app.post("/matchdelete/:id", (req, res) => {
   const id = req.params.id;
-  const sql = "DELETE FROM matches WHERE id = ?";
+  const sql = "DELETE FROM Matches WHERE id = ? ";
   db.run(sql, id, err => {
     // if (err) ...
     res.redirect("/matches");
   });
 });
+app.get('/upload', (req, res) => res.sendFile(path.join(__dirname, 'views/teams.ejs')))
+app.post('/upload', upload.single('file'), function (req, res, next) {
+  res.send('ファイルのアップロードが完了しました。');
+})

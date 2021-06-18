@@ -26,6 +26,10 @@
       <% } %>
     </tbody>
   </table>
+  <form action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="upName">
+    <input type="submit">
+  </form>
 </div>
 
 <%- include("_footer") -%>
