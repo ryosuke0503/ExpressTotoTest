@@ -17,8 +17,8 @@
       <% for (const team of model) { %>
         <tr>
           <td><%= team.id %></td>
-          <td><%= team.name %></td>
           <td class="d-print-none">
+            <a class="btn btn-sm btn-success" href="/teamshow/<%= team.id %>"><%= team.name %></a>
             <a class="btn btn-sm btn-warning" href="/teamedit/<%= team.id %>">Edit</a>
             <a class="btn btn-sm btn-danger" href="/teamdelete/<%= team.id %>">Delete</a>
           </td>
@@ -26,7 +26,7 @@
       <% } %>
     </tbody>
   </table>
-  <form action="/upload" method="POST" enctype="multipart/form-data">
+  <form action="/teamupload" method="POST" enctype="multipart/form-data">
     <input type="file" name="upName">
     <input type="submit">
   </form>

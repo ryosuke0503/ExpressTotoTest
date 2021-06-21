@@ -2,6 +2,8 @@ const express = require("express");
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
 const multer = require('multer')
+const fs = require('fs')
+const readline = require('readline');
 const upload = multer({ dest: 'uploads/' })
 
 const app = express();
@@ -196,7 +198,88 @@ app.post("/matchdelete/:id", (req, res) => {
     res.redirect("/matches");
   });
 });
-app.get('/upload', (req, res) => res.sendFile(path.join(__dirname, 'views/teams.ejs')))
-app.post('/upload', upload.single('file'), function (req, res, next) {
-  res.send('ファイルのアップロードが完了しました。');
+app.get("/teamshow/:id", (req, res) => {
+    const id = req.params.id;
+    var matches = 0;
+    var wins = 0;
+    var loses = 0;
+    var draws = 0;
+    var gpoints = 0;
+    var lpoints = 0;
+    var details = {wins:0, loses:0, draws:0};
+    var sql = "SELECT COUNT(home = ? or NULL) FROM Matches";
+
+    db.get(sql, id, (err, row) => {
+      matches += row["COUNT(home = ? or NULL)"]
+    });
+    sql = "SELECT COUNT(away = ? or NULL) FROM Matches";
+    db.get(sql, id, (err, row) => {
+      matches += row["COUNT(away = ? or NULL)"]
+    });
+    sql = "SELECT COUNT((home = ? or NULL) and (homescore > awayscore or NULL)) FROM Matches";
+    db.get(sql, id, (err, row) => {
+      console.log(wins)
+      wins += parseInt(row["COUNT((home = ? or NULL) and (homescore > awayscore or NULL))"]);
+      console.log(parseInt(row["COUNT((home = ? or NULL) and (homescore > awayscore or NULL))"]))
+      console.log(wins)
+    });
+    sql = "SELECT COUNT((away = ? or NULL) and (homescore < awayscore or NULL)) FROM Matches";
+    db.get(sql, id, (err, row) => {wins += parseInt(row["COUNT((away = ? or NULL) and (homescore < awayscore or NULL))"]);});
+    sql = "SELECT COUNT((home = ? or NULL) and (homescore < awayscore or NULL)) FROM Matches";
+    db.get(sql, id, (err, row) => {loses += row["COUNT((home = ? or NULL) and (homescore < awayscore or NULL))"];});
+    sql = "SELECT COUNT((away = ? or NULL) and (homescore > awayscore or NULL)) FROM Matches";
+    db.get(sql, id, (err, row) => {loses += row["COUNT((away = ? or NULL) and (homescore > awayscore or NULL))"];});
+    sql = "SELECT COUNT((home = ? or away = ? or NULL) and (homescore = awayscore or NULL)) FROM Matches";
+    db.get(sql, id, (err, row) => {draws += row["COUNT((home = ? or away = ? or NULL) and (homescore = awayscore or NULL))"];});
+
+    details.wins = wins;
+    details.loses = loses;
+    details.draws = draws;
+
+    console.log(wins)
+    console.log(loses)
+    console.log(draws)
+    console.log(details)
+
+    sql = "SELECT * FROM Teams WHERE id = ?";
+    db.get(sql, id, (err, row) => {
+      // if (err) ...
+      console.log(row)
+      res.render("teamshow", { model: row });
+    });
+});
+app.post("/teamshow/:id", (req, res) => {
+  res.redirect("/teams");
+});
+app.post('/teamupload', upload.single('upName'), (req, res) => {
+  console.log(`originalname: ${req.file.originalname}`)
+  console.log(`path: ${req.file.path}`)
+
+  const rs = fs.createReadStream(req.file.path);
+  const rl = readline.createInterface({input: rs, });
+  var sql = "";
+  rl.on('line', (linestring)=>{
+    sql = 'INSERT INTO Teams (name) VALUES ('+linestring+')';
+    db.run(sql, err => {
+      if(err){console.log(err);}
+    });
+  })
+
+  res.redirect("/teams");
+})
+app.post('/matchupload', upload.single('upName'), (req, res) => {
+  console.log(`originalname: ${req.file.originalname}`)
+  console.log(`path: ${req.file.path}`)
+
+  const rs = fs.createReadStream(req.file.path);
+  const rl = readline.createInterface({input: rs, });
+  var sql = "";
+  rl.on('line', (linestring)=>{
+    sql = 'INSERT INTO Matches (year, league, kind, date, time, home, homescore, awayscore, away, stadium, viewers, broadcasts) VALUES ('+linestring+')';
+    db.run(sql, err => {
+      if(err){console.log(err);}
+    });
+  })
+
+  res.redirect("/matches");
 })
